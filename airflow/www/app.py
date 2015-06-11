@@ -32,14 +32,10 @@ import markdown
 import chartkick
 
 import airflow
-login_required = airflow.login.login_required
-current_user = airflow.login.current_user
-logout_user = airflow.login.logout_user
 
 from airflow.settings import Session
 from airflow import jobs
 from airflow import models
-from airflow import login
 from airflow.models import State
 from airflow import settings
 from airflow.configuration import conf
@@ -47,6 +43,19 @@ from airflow import utils
 from airflow.www import utils as wwwutils
 
 from functools import wraps
+
+from airflow import default_login as login
+if conf.getboolean('webserver', 'AUTHENTICATE'):
+    try:
+        # Environment specific login
+        import airflow_login as login
+    except ImportError:
+        logging.error(
+            "authenticate is set to True in airflow.cfg, "
+            "but airflow_login failed to import")
+login_required = login.login_required
+current_user = login.current_user
+logout_user = login.logout_user
 
 AUTHENTICATE = conf.getboolean('webserver', 'AUTHENTICATE')
 if AUTHENTICATE is False:
@@ -1755,3 +1764,10 @@ class PoolModelView(SuperUserMixin, ModelView):
     named_filter_urls = True
 mv = PoolModelView(models.Pool, Session, name="Pools", category="Admin")
 admin.add_view(mv)
+
+
+from airflow.plugins_manager import get_plugins
+from airflow import PluginView
+for plugin in get_plugins(PluginView):
+    for view in plugin.get_views():
+        admin.add_view(view)
