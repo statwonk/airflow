@@ -75,6 +75,7 @@ Currently **officially** using Airflow:
 * Wooga
 * Xoom [[@gepser](https://github.com/gepser) & [@omarvides](https://github.com/omarvides)]
 * Yahoo!
+* [Zapier](https://zapier.com) [[@statwonk](https://github.com/statwonk)]
 
 ## Links
 
